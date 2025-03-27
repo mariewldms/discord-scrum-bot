@@ -1,0 +1,23 @@
+name: Discord Daily Scrum
+
+on:
+  schedule:
+    - cron: '0 0 * * 1,5'  # 매주 월요일, 금요일 오전 9시 (KST 기준)
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Date Info
+        id: date
+        run: |
+          DATE=$(TZ=Asia/Seoul date "+%m/%d(%a)")
+          echo "today=$DATE" >> $GITHUB_OUTPUT
+
+      - name: Send Daily Scrum Message
+        run: |
+          curl -H "Content-Type: application/json" \
+          -X POST \
+          -d "{\"content\": \"**📅 ${{ steps.date.outputs.today }} 데일리 스크럼**\n\n✅ 엊그제 진행한 일\n- \n\n🎯 오늘내일 할 일\n- \n\n⚠️ 기타 이슈\n- \"}" \
+          ${{ secrets.DISCORD_WEBHOOK }}
